@@ -1,0 +1,123 @@
+1. User Preference Model
+
+import { IsBoolean, IsEmail, IsEnum, IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class UserPreference {
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
+
+  @IsEmail()
+  email: string;
+
+  @Type(() => Preferences)
+  preferences: Preferences;
+
+  @IsString()
+  timezone: string;
+
+  @IsNotEmpty()
+  createdAt: Date;
+
+  @IsOptional()
+  @IsNotEmpty()
+  lastUpdated?: Date;
+}
+
+class Preferences {
+  @IsBoolean()
+  marketing: boolean;
+
+  @IsBoolean()
+  newsletter: boolean;
+
+  @IsBoolean()
+  updates: boolean;
+
+  @IsEnum(['daily', 'weekly', 'monthly', 'never'])
+  frequency: 'daily' | 'weekly' | 'monthly' | 'never';
+
+  channels: Channels;
+}
+
+class Channels {
+  @IsBoolean()
+  email: boolean;
+
+  @IsBoolean()
+  sms: boolean;
+
+  @IsBoolean()
+  push: boolean;
+}
+
+2.Notification Log Model
+
+import { IsEnum, IsString, IsNotEmpty, IsOptional } from 'class-validator';
+
+export class NotificationLog {
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
+
+  @IsEnum(['marketing', 'newsletter', 'updates'])
+  type: 'marketing' | 'newsletter' | 'updates';
+
+  @IsEnum(['email', 'sms', 'push'])
+  channel: 'email' | 'sms' | 'push';
+
+  @IsEnum(['pending', 'sent', 'failed'])
+  status: 'pending' | 'sent' | 'failed';
+
+  @IsOptional()
+  sentAt?: Date;
+
+  @IsOptional()
+  @IsString()
+  failureReason?: string;
+
+  @IsNotEmpty()
+  metadata: Record<string, any>;
+}
+
+API Endpoints
+1. User Preferences
+POST /api/preferences
+
+Create a new user preference record.
+Request Body:
+
+{
+  "userId": "user123",
+  "email": "user@example.com",
+  "preferences": {
+    "marketing": true,
+    "newsletter": false,
+    "updates": true,
+    "frequency": "weekly",
+    "channels": {
+      "email": true,
+      "sms": false,
+      "push": true
+    }
+  },
+  "timezone": "America/New_York"
+}
+
+2. Notification Management
+POST /api/notifications/send
+
+Send a notification based on user preferences.
+Request Body:
+
+{
+  "userId": "user123",
+  "type": "marketing",
+  "channel": "email",
+  "content": {
+    "subject": "Special Offer",
+    "body": "Check out our latest deals!"
+  }
+}
+
